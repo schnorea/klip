@@ -1,0 +1,2 @@
+pyperclip
+https://github.com/zeromq/pyre/archive/master.zip
