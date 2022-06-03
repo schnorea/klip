@@ -6,6 +6,7 @@ import uuid
 import logging
 import sys
 import json
+import time
 from pprint import pprint
 import pyperclip
 
@@ -34,7 +35,6 @@ def chat_task(ctx, pipe):
             #print("CHAT_TASK: %s" % message)
             n.shouts("CHAT", message.decode('utf-8'))
         else:
-        #if n.socket() in items and items[n.socket()] == zmq.POLLIN:
             cmds = n.recv()
             msg_type = cmds.pop(0).decode('utf-8')
             msg_peer = uuid.UUID(bytes=cmds.pop(0))
@@ -46,11 +46,14 @@ def chat_task(ctx, pipe):
 
             if msg_type == 'JOIN':
                 pass
+                msg_cont = cmds.pop(0).decode('utf-8')
+                debug and print("NODE_MSG CONT: %s" % msg_cont)
             elif msg_type == "SHOUT":
                 msg_group = cmds.pop(0).decode('utf-8')
                 debug and print("NODE_MSG GROUP: %s" % msg_group)
                 msg_cont = cmds.pop(0).decode('utf-8')
-                print("NODE_MSG CONT: \n%s" % msg_cont)
+                # Output contents of remote clipboard
+                print("From Remote Clipboard: \n%s" % msg_cont)
                 print()
             elif msg_type == "ENTER":
                 msg_headers = cmds.pop(0).decode('utf-8')
@@ -58,9 +61,8 @@ def chat_task(ctx, pipe):
                 debug and print("NODE_MSG HEADERS: %s" % headers)
                 for key in headers:
                     debug and print("key = {0}, value = {1}".format(key, headers[key]))
-
-            #msg_cont = cmds.pop(0).decode('utf-8')
-            #print("NODE_MSG CONT: %s" % msg_cont)
+                msg_cont = cmds.pop(0).decode('utf-8')
+                debug and print("NODE_MSG CONT: %s" % msg_cont)
     n.stop()
 
 
@@ -84,6 +86,7 @@ if __name__ == '__main__':
                 msg = tmp_value
                 #msg = input()
                 chat_pipe.send(msg.encode('utf_8'))
+            time.sleep(0.1)
         except (KeyboardInterrupt, SystemExit):
             break
     chat_pipe.send("$$STOP".encode('utf_8'))
